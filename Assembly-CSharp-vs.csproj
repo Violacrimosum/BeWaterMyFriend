@@ -48,6 +48,7 @@
   <ItemGroup>
      <Compile Include="Assets\FPSWalkerEnhanced.cs" />
      <Compile Include="Assets\MouseLook.cs" />
+     <Compile Include="Assets\ProgressBar.cs" />
      <None Include="Assets\Standard Assets\Projectors\Guidelines.txt" />
      <None Include="Assets\ShaderFog.shader" />
      <None Include="Assets\Standard Assets\Projectors\Sources\Shaders\Projector Multiply.shader" />
@@ -59,7 +60,7 @@
      <None Include="Assets\Standard Assets\Water (Pro Only)\Water4\Sources\Shaders\WaterInclude.cginc" />
      <None Include="Assets\Standard Assets\Water (Pro Only)\Water4\Sources\Shaders\FX-Water4.shader" />
  <Reference Include="Assembly-UnityScript-firstpass">
- <HintPath>C:/BeWaterMyFriend/BeWaterMyFriend/Library/ScriptAssemblies/Assembly-UnityScript-firstpass.dll</HintPath>
+ <HintPath>C:/Users/Frolix/Documents/GitHub/BeWaterMyFriend/Library/ScriptAssemblies/Assembly-UnityScript-firstpass.dll</HintPath>
  </Reference>
   </ItemGroup>
   <ItemGroup>

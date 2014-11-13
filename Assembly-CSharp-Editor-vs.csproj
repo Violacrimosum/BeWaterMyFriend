@@ -62,7 +62,7 @@
      <None Include="Assets\Standard Assets\Water (Pro Only)\Water4\Sources\Shaders\WaterInclude.cginc" />
      <None Include="Assets\Standard Assets\Water (Pro Only)\Water4\Sources\Shaders\FX-Water4.shader" />
  <Reference Include="Assembly-UnityScript-firstpass">
- <HintPath>C:/BeWaterMyFriend/BeWaterMyFriend/Library/ScriptAssemblies/Assembly-UnityScript-firstpass.dll</HintPath>
+ <HintPath>C:/Users/Frolix/Documents/GitHub/BeWaterMyFriend/Library/ScriptAssemblies/Assembly-UnityScript-firstpass.dll</HintPath>
  </Reference>
  <Reference Include="UnityEditor.Graphs">
  <HintPath>C:/Program Files (x86)/Unity/Editor/Data/Managed/UnityEditor.Graphs.dll</HintPath>

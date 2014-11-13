@@ -4,7 +4,7 @@ using System.Collections;
 [RequireComponent (typeof (CharacterController))]
 public class FPSWalkerEnhanced: MonoBehaviour {
 	
-	public float walkSpeed = 6.0f;
+	public float walkSpeed = 20.0f;
 	
 	public float runSpeed = 11.0f;
 	
@@ -37,7 +37,26 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 	
 	// Player must be grounded for at least this many physics frames before being able to jump again; set to 0 to allow bunny hopping
 	public int antiBunnyHopFactor = 1;
-	
+
+	//Modify the air control 
+	public float airModifyFactor = 1;
+
+
+	public float healthBar = 0;
+	public float maxHealth = 100;
+	public float minHealth = 0;
+	public float barSpeed = 0.5f;
+	public float speedRegenHealth = 10;
+
+	private bool isOnTheWall;
+	private bool jumped= false;
+	private bool hyperMode=false;
+	private bool hyperModeTimeBool=false;
+	private float hyperModeTime=0;
+
+
+	private float actualSpeed;
+	private bool gameOver;
 	private Vector3 moveDirection = Vector3.zero;
 	private bool grounded = false;
 	private CharacterController controller;
@@ -51,6 +70,7 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 	private Vector3 contactPoint;
 	private bool playerControl = false;
 	private int jumpTimer;
+
 	
 	void Start() {
 		controller = GetComponent<CharacterController>();
@@ -59,6 +79,8 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 		rayDistance = controller.height * .5f + controller.radius;
 		slideLimit = controller.slopeLimit - .1f;
 		jumpTimer = antiBunnyHopFactor;
+		isOnTheWall = false;
+		gameOver=false;
 	}
 	
 	void FixedUpdate() {
@@ -66,8 +88,9 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 		float inputY = Input.GetAxis("Vertical");
 		// If both horizontal and vertical are used simultaneously, limit speed (if allowed), so the total doesn't exceed normal move speed
 		float inputModifyFactor = (inputX != 0.0f && inputY != 0.0f && limitDiagonalSpeed)? .7071f : 1.0f;
-		
+
 		if (grounded) {
+
 			bool sliding = false;
 			// See if surface immediately below should be slid down. We use this normally rather than a ControllerColliderHit point,
 			// because that interferes with step climbing amongst other annoyances
@@ -82,6 +105,7 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 				if (Vector3.Angle(hit.normal, Vector3.up) > slideLimit)
 					sliding = true;
 			}
+
 			
 			// If we were falling, and we fell a vertical distance greater than the threshold, run a falling damage routine
 			if (falling) {
@@ -126,24 +150,118 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 			
 			// If air control is allowed, check movement but don't touch the y component
 			if (airControl && playerControl) {
-				moveDirection.x = inputX * speed * inputModifyFactor;
-				moveDirection.z = inputY * speed * inputModifyFactor;
+				moveDirection.x = inputX * speed * airModifyFactor * inputModifyFactor;
+				moveDirection.z = inputY * speed * airModifyFactor * inputModifyFactor;
 				moveDirection = myTransform.TransformDirection(moveDirection);
 			}
 		}
-		
+
+
 		// Apply gravity
-		moveDirection.y -= gravity * Time.deltaTime;
+		if(isOnTheWall){
+			moveDirection.y = 0;
+			if (Input.GetButtonDown("Jump"))
+			{
+				isOnTheWall=false;
+				moveDirection.y = jumpSpeed;
+			}
+
+		}
+		else{
+			moveDirection.y -= gravity * Time.deltaTime;
+		}
+
 		
 		// Move the controller, and set grounded true or false depending on whether we're standing on something
 		grounded = (controller.Move(moveDirection * Time.deltaTime) & CollisionFlags.Below) != 0;
+
+
+		//If negative speed
+		if(moveDirection.x<=0){
+			actualSpeed=-moveDirection.x;
+		}
+		else{
+			actualSpeed=moveDirection.x;
+		}
+		if(actualSpeed == 0){
+			barSpeed = 0.72f;
+		}
+		else if(actualSpeed<speedRegenHealth){
+			barSpeed = 0.72f-actualSpeed/speedRegenHealth*0.72f;
+		}
+		else{
+			barSpeed = -actualSpeed/speed*0.4f;
+		}
+
+
+		//ACTIVATE HYPERMODE OMAGAD
+		if(healthBar<4)
+		{
+			if(!hyperModeTimeBool)
+			{
+				hyperModeTime=Time.time;
+				hyperModeTimeBool=true;
+			}
+			else if(Time.time-hyperModeTime>=3)
+			{
+				hyperMode=true;
+				hyperModeTime=0;
+			}
+		}
+
+		if(hyperMode)
+		{
+			speed = 30.0f;
+			walkSpeed = 30.0f;
+		}
+		else
+		{
+			speed = 20.0f;
+			walkSpeed = 20.0f;
+		}
+
+		if(healthBar>10)
+		{
+			hyperMode=false;
+			hyperModeTimeBool=false;
+			hyperModeTime=0;
+		}
+
+		print (hyperModeTimeBool + " || " + hyperModeTime + " || " + hyperMode + " || "+actualSpeed);
+
+
+		//Bar limits
+		if(healthBar>maxHealth){
+			gameOver = true;
+		}
+		if(healthBar<minHealth){
+			healthBar = minHealth;
+		}
+		if(transform.position.y <-4)
+			gameOver=true;
+		if(gameOver){
+			Application.LoadLevel(Application.loadedLevel);
+		}
+		healthBar+=barSpeed;
+		
 	}
-	
+
+	void OnTriggerEnter(Collider other) {
+		isOnTheWall=true;
+	}
+
+	void OnTriggerExit(Collider other) {
+		isOnTheWall=false;
+	}
+
+
 	void Update () {
 		// If the run button is set to toggle, then switch between walk/run speed. (We use Update for this...
 		// FixedUpdate is a poor place to use GetButtonDown, since it doesn't necessarily run every frame and can miss the event)
 		if (toggleRun && grounded && Input.GetButtonDown("Run"))
 			speed = (speed == walkSpeed? runSpeed : walkSpeed);
+
+
 	}
 	
 	// Store point that we're in contact with for use in FixedUpdate if needed

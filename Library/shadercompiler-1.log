@@ -1,49 +1,5 @@
 Base path: C:/Program Files (x86)/Unity/Editor/Data
-Pipe name: \\.\pipe\UnityShaderCompiler-1-5708
+Pipe name: \\.\pipe\UnityShaderCompiler-1-7612
 Cmd: getPlatforms
 Cmd: preprocess
-  insize=433 outsize=1179 ok=1
-Cmd: compileSnippet
-  api=4 type=0 insize=4279 outsize=2607 kw=DIRECTIONAL SHADOWS_OFF LIGHTMAP_OFF DIRLIGHTMAP_OFF ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=4279 outsize=1242 kw=DIRECTIONAL SHADOWS_OFF LIGHTMAP_OFF DIRLIGHTMAP_OFF ok=1
-Cmd: compileSnippet
-  api=4 type=0 insize=2255 outsize=2875 kw=POINT ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=2255 outsize=1542 kw=POINT ok=1
-Cmd: compileSnippet
-  api=4 type=0 insize=1783 outsize=1477 kw= ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=1783 outsize=632 kw= ok=1
-Cmd: compileSnippet
-  api=4 type=0 insize=3996 outsize=2883 kw=LIGHTMAP_OFF DIRLIGHTMAP_OFF HDR_LIGHT_PREPASS_OFF ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=3996 outsize=1152 kw=LIGHTMAP_OFF DIRLIGHTMAP_OFF HDR_LIGHT_PREPASS_OFF ok=1
-Cmd: preprocess
-  error: 1 plat 12 at (9): Compiling shaders to OpenGL ES 2.0, Xbox 360, PS3, Flash or DX11 requires both vertex and fragment programs
-  insize=1117 outsize=232 ok=1
-Cmd: preprocess
-  error: 1 plat 12 at (9): Compiling shaders to OpenGL ES 2.0, Xbox 360, PS3, Flash or DX11 requires both vertex and fragment programs
-  insize=1117 outsize=232 ok=1
-Cmd: preprocess
-  insize=1038 outsize=1179 ok=1
-Cmd: compileSnippet
-  api=4 type=0 insize=5128 outsize=3297 kw=DIRECTIONAL SHADOWS_OFF LIGHTMAP_OFF DIRLIGHTMAP_OFF ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=5128 outsize=1469 kw=DIRECTIONAL SHADOWS_OFF LIGHTMAP_OFF DIRLIGHTMAP_OFF ok=1
-Cmd: compileSnippet
-  api=4 type=0 insize=3069 outsize=3565 kw=POINT ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=3069 outsize=1729 kw=POINT ok=1
-Cmd: compileSnippet
-  api=4 type=0 insize=2570 outsize=2200 kw= ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=2570 outsize=681 kw= ok=1
-Cmd: compileSnippet
-  api=4 type=0 insize=4810 outsize=3573 kw=LIGHTMAP_OFF DIRLIGHTMAP_OFF HDR_LIGHT_PREPASS_OFF ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=4810 outsize=1372 kw=LIGHTMAP_OFF DIRLIGHTMAP_OFF HDR_LIGHT_PREPASS_OFF ok=1
-Cmd: compileSnippet
-  api=4 type=0 insize=3069 outsize=2542 kw=DIRECTIONAL ok=1
-Cmd: compileSnippet
-  api=4 type=1 insize=3069 outsize=1315 kw=DIRECTIONAL ok=1
+  insize=1082 outsize=1191 ok=1
