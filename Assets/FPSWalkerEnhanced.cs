@@ -245,8 +245,6 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 		}
 		healthBar+=barSpeed;
 
-
-		
 	}
 
 	void OnTriggerEnter(Collider other) {
