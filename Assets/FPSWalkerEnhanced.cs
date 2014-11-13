@@ -46,7 +46,9 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 	public float maxHealth = 100;
 	public float minHealth = 0;
 	public float barSpeed = 0.5f;
-	public float speedRegenHealth = 10;
+	public float speedRegenHealth = 15;
+
+	public bool watered = false;
 
 	private bool isOnTheWall;
 	private bool jumped= false;
@@ -81,6 +83,7 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 		jumpTimer = antiBunnyHopFactor;
 		isOnTheWall = false;
 		gameOver=false;
+		watered=false;
 	}
 	
 	void FixedUpdate() {
@@ -170,29 +173,27 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 		else{
 			moveDirection.y -= gravity * Time.deltaTime;
 		}
-
 		
 		// Move the controller, and set grounded true or false depending on whether we're standing on something
 		grounded = (controller.Move(moveDirection * Time.deltaTime) & CollisionFlags.Below) != 0;
-
-
-		//If negative speed
-		if(moveDirection.x<=0){
-			actualSpeed=-moveDirection.x;
+		if(Mathf.Abs(moveDirection.x)>=Mathf.Abs(moveDirection.z))
+		{
+			actualSpeed=Mathf.Abs(moveDirection.x);
 		}
-		else{
-			actualSpeed=moveDirection.x;
+		else 
+		{
+			actualSpeed=Mathf.Abs(moveDirection.z);
 		}
+
 		if(actualSpeed == 0){
-			barSpeed = 0.72f;
+			barSpeed = 0.80f;
 		}
 		else if(actualSpeed<speedRegenHealth){
-			barSpeed = 0.72f-actualSpeed/speedRegenHealth*0.72f;
+			barSpeed = 0.80f-actualSpeed/speedRegenHealth*0.80f;
 		}
 		else{
-			barSpeed = -actualSpeed/speed*0.4f;
+			barSpeed = -actualSpeed/speed*0.35f;
 		}
-
 
 		//ACTIVATE HYPERMODE OMAGAD
 		if(healthBar<4)
@@ -207,6 +208,10 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 				hyperMode=true;
 				hyperModeTime=0;
 			}
+		}
+		if(watered)
+		{
+			gameOver=true;
 		}
 
 		if(hyperMode)
@@ -226,10 +231,7 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 			hyperModeTimeBool=false;
 			hyperModeTime=0;
 		}
-
-		print (hyperModeTimeBool + " || " + hyperModeTime + " || " + hyperMode + " || "+actualSpeed);
-
-
+		print (actualSpeed);
 		//Bar limits
 		if(healthBar>maxHealth){
 			gameOver = true;
@@ -237,21 +239,28 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 		if(healthBar<minHealth){
 			healthBar = minHealth;
 		}
-		if(transform.position.y <-4)
-			gameOver=true;
+		
 		if(gameOver){
 			Application.LoadLevel(Application.loadedLevel);
 		}
 		healthBar+=barSpeed;
+
+
 		
 	}
 
 	void OnTriggerEnter(Collider other) {
-		isOnTheWall=true;
+		if(other.tag == "WallJump" || other.tag == "Agripper")
+		{
+			isOnTheWall=true;
+		}
 	}
 
 	void OnTriggerExit(Collider other) {
-		isOnTheWall=false;
+		if(other.tag == "WallJump" || other.tag == "Agripper")
+		{
+			isOnTheWall=false;
+		}
 	}
 
 
