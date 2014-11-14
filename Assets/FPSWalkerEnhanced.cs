@@ -47,6 +47,8 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 	public float minHealth = 0;
 	public float barSpeed = 0.5f;
 	public float speedRegenHealth = 15;
+	public float fov = 60;
+	public float maxFov = 75;
 
 	public bool watered = false;
 
@@ -55,6 +57,7 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 	private bool hyperMode=false;
 	private bool hyperModeTimeBool=false;
 	private float hyperModeTime=0;
+	private bool finished = false;
 
 
 	private float actualSpeed;
@@ -87,6 +90,7 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 	}
 	
 	void FixedUpdate() {
+
 		float inputX = Input.GetAxis("Horizontal");
 		float inputY = Input.GetAxis("Vertical");
 		// If both horizontal and vertical are used simultaneously, limit speed (if allowed), so the total doesn't exceed normal move speed
@@ -216,11 +220,15 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 
 		if(hyperMode)
 		{
+			if(Camera.main.fieldOfView<maxFov)
+				Camera.main.fieldOfView+=60*Time.deltaTime;
 			speed = 30.0f;
 			walkSpeed = 30.0f;
 		}
 		else
 		{
+			if(Camera.main.fieldOfView>fov)
+				Camera.main.fieldOfView-=60*Time.deltaTime;
 			speed = 20.0f;
 			walkSpeed = 20.0f;
 		}
@@ -252,12 +260,40 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 		{
 			isOnTheWall=true;
 		}
+
+		if(other.tag == "Water")
+		{
+			gameOver=true;
+		}
+
+		if(other.tag == "Finish")
+		{
+			finished = true;
+		}
 	}
+
 
 	void OnTriggerExit(Collider other) {
 		if(other.tag == "WallJump" || other.tag == "Agripper")
 		{
 			isOnTheWall=false;
+		}
+	}
+
+	
+	void OnGUI()
+	{
+		if(finished)
+		{
+			Texture2D t = new Texture2D(1,1);
+			Color currentBlendColor = new Color( 1, 1, 1, 0 ); 
+			Color fromColor = new Color( 1, 1, 1, 0 ); 
+			Color toColor = new Color( 1, 1, 1, 1 );
+			float endSpeed = 10;
+			t.SetPixel( 0, 0, Color.white );
+			currentBlendColor = Color.Lerp( currentBlendColor , toColor, Time.deltaTime * speed );
+			GUI.color = currentBlendColor;
+			GUI.DrawTexture(new Rect(0,0,Screen.width,Screen.height), t, ScaleMode.ScaleToFit); 
 		}
 	}
 
