@@ -209,7 +209,7 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 					hyperModeTime=Time.time;
 					hyperModeTimeBool=true;
 				}
-				else if(Time.time-hyperModeTime>=3)
+				else if(Time.time-hyperModeTime>=1.5)
 				{
 					hyperMode=true;
 					hyperModeTime=0;

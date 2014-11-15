@@ -1,12 +1,12 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\FadeText.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Standard Assets\Water (Pro Only)\Water4\Sources\Shaders\FX-SimpleWater4.shader">
     <Files>
-      <File FileName="Assets\FadeScreen.cs" Line="43" Column="86" />
-      <File FileName="Assets\FPSWalkerEnhanced.cs" Line="265" Column="1" />
-      <File FileName="Assets\MouseLook.cs" Line="1" Column="1" />
-      <File FileName="Assets\ProgressBar.cs" Line="28" Column="86" />
-      <File FileName="Assets\FadeText.cs" Line="33" Column="92" />
+      <File FileName="Assets\Water.shader" Line="47" Column="5" />
+      <File FileName="..\..\Dismembered\Dismembered\Assets\Scripts\Gameplay\GirlController.cs" Line="1" Column="1" />
+      <File FileName="..\..\Dismembered\Dismembered\Assets\Scripts\Test.cs" Line="1" Column="1" />
+      <File FileName="Assets\Resources\Scripts\HUD\HUDmenu.cs" Line="1" Column="1" />
+      <File FileName="Assets\Standard Assets\Water (Pro Only)\Water4\Sources\Shaders\FX-SimpleWater4.shader" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
