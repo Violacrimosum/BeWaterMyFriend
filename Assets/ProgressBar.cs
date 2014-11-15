@@ -15,6 +15,8 @@ public class ProgressBar : MonoBehaviour {
 	public Texture2D emptyTex;
 	public Texture2D fullTex;
 
+	public bool isFinished = false;
+
 	void Start(){
 		maxHealth = GetComponent<FPSWalkerEnhanced>().maxHealth;
 		size = new Vector2(300,50);
@@ -23,19 +25,24 @@ public class ProgressBar : MonoBehaviour {
 	}
 
 	void OnGUI() {
-		GUI.skin = customSkin;
-		//draw the background:
-		GUI.BeginGroup(new Rect(pos.x, pos.y, size.x, size.y));
-		GUI.Box(new Rect(0,0, size.x, size.y), emptyTex);
-		//draw the filled-in part:
-		GUI.BeginGroup(new Rect(0,0, size.x * barDisplay, size.y));
-		GUI.Box(new Rect(0,0, size.x, size.y), fullTex);
-		GUI.EndGroup();
-		GUI.EndGroup();
+		isFinished = GameObject.Find("Capsule").GetComponent<FPSWalkerEnhanced>().finished;
+		if(!isFinished)
+		{
+			GUI.skin = customSkin;
+			//draw the background:
+			GUI.BeginGroup(new Rect(pos.x, pos.y, size.x, size.y));
+			GUI.Box(new Rect(0,0, size.x, size.y), emptyTex);
+			//draw the filled-in part:
+			GUI.BeginGroup(new Rect(0,0, size.x * barDisplay, size.y));
+			GUI.Box(new Rect(0,0, size.x, size.y), fullTex);
+			GUI.EndGroup();
+			GUI.EndGroup();
+		}
 	}
 	
 	// Update is called once per frame
 	void Update () {
+
 		health = GetComponent<FPSWalkerEnhanced>().healthBar;
 		barDisplay = health/maxHealth;
 	}

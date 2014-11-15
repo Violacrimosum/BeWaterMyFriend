@@ -47,6 +47,8 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\FPSWalkerEnhanced.cs" />
+     <Compile Include="Assets\FadeScreen.cs" />
+     <Compile Include="Assets\FadeText.cs" />
      <Compile Include="Assets\MouseLook.cs" />
      <Compile Include="Assets\ProgressBar.cs" />
      <None Include="Assets\Standard Assets\Projectors\Guidelines.txt" />

@@ -1,10 +1,12 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\FPSWalkerEnhanced.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\FadeText.cs">
     <Files>
-      <File FileName="Assets\FPSWalkerEnhanced.cs" Line="297" Column="4" />
-      <File FileName="Assets\ShaderFog.shader" Line="1" Column="1" />
+      <File FileName="Assets\FadeScreen.cs" Line="43" Column="86" />
+      <File FileName="Assets\FPSWalkerEnhanced.cs" Line="265" Column="1" />
       <File FileName="Assets\MouseLook.cs" Line="1" Column="1" />
+      <File FileName="Assets\ProgressBar.cs" Line="28" Column="86" />
+      <File FileName="Assets\FadeText.cs" Line="33" Column="92" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

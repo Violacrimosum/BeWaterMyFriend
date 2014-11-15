@@ -57,7 +57,7 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 	private bool hyperMode=false;
 	private bool hyperModeTimeBool=false;
 	private float hyperModeTime=0;
-	private bool finished = false;
+	public bool finished = false;
 
 
 	private float actualSpeed;
@@ -90,168 +90,170 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 	}
 	
 	void FixedUpdate() {
+		if(!finished)
+		{
 
-		float inputX = Input.GetAxis("Horizontal");
-		float inputY = Input.GetAxis("Vertical");
-		// If both horizontal and vertical are used simultaneously, limit speed (if allowed), so the total doesn't exceed normal move speed
-		float inputModifyFactor = (inputX != 0.0f && inputY != 0.0f && limitDiagonalSpeed)? .7071f : 1.0f;
+			float inputX = Input.GetAxis("Horizontal");
+			float inputY = Input.GetAxis("Vertical");
+			// If both horizontal and vertical are used simultaneously, limit speed (if allowed), so the total doesn't exceed normal move speed
+			float inputModifyFactor = (inputX != 0.0f && inputY != 0.0f && limitDiagonalSpeed)? .7071f : 1.0f;
 
-		if (grounded) {
+			if (grounded) {
 
-			bool sliding = false;
-			// See if surface immediately below should be slid down. We use this normally rather than a ControllerColliderHit point,
-			// because that interferes with step climbing amongst other annoyances
-			if (Physics.Raycast(myTransform.position, -Vector3.up, out hit, rayDistance)) {
-				if (Vector3.Angle(hit.normal, Vector3.up) > slideLimit)
-					sliding = true;
+				bool sliding = false;
+				// See if surface immediately below should be slid down. We use this normally rather than a ControllerColliderHit point,
+				// because that interferes with step climbing amongst other annoyances
+				if (Physics.Raycast(myTransform.position, -Vector3.up, out hit, rayDistance)) {
+					if (Vector3.Angle(hit.normal, Vector3.up) > slideLimit)
+						sliding = true;
+				}
+				// However, just raycasting straight down from the center can fail when on steep slopes
+				// So if the above raycast didn't catch anything, raycast down from the stored ControllerColliderHit point instead
+				else {
+					Physics.Raycast(contactPoint + Vector3.up, -Vector3.up, out hit);
+					if (Vector3.Angle(hit.normal, Vector3.up) > slideLimit)
+						sliding = true;
+				}
+
+				
+				// If we were falling, and we fell a vertical distance greater than the threshold, run a falling damage routine
+				if (falling) {
+					falling = false;
+					if (myTransform.position.y < fallStartLevel - fallingDamageThreshold)
+						FallingDamageAlert (fallStartLevel - myTransform.position.y);
+				}
+				
+				// If running isn't on a toggle, then use the appropriate speed depending on whether the run button is down
+				if (!toggleRun)
+					speed = Input.GetButton("Run")? runSpeed : walkSpeed;
+				
+				// If sliding (and it's allowed), or if we're on an object tagged "Slide", get a vector pointing down the slope we're on
+				if ( (sliding && slideWhenOverSlopeLimit) || (slideOnTaggedObjects && hit.collider.tag == "Slide") ) {
+					Vector3 hitNormal = hit.normal;
+					moveDirection = new Vector3(hitNormal.x, -hitNormal.y, hitNormal.z);
+					Vector3.OrthoNormalize (ref hitNormal, ref moveDirection);
+					moveDirection *= slideSpeed;
+					playerControl = false;
+				}
+				// Otherwise recalculate moveDirection directly from axes, adding a bit of -y to avoid bumping down inclines
+				else {
+					moveDirection = new Vector3(inputX * inputModifyFactor, -antiBumpFactor, inputY * inputModifyFactor);
+					moveDirection = myTransform.TransformDirection(moveDirection) * speed;
+					playerControl = true;
+				}
+				
+				// Jump! But only if the jump button has been released and player has been grounded for a given number of frames
+				if (!Input.GetButton("Jump"))
+					jumpTimer++;
+				else if (jumpTimer >= antiBunnyHopFactor) {
+					moveDirection.y = jumpSpeed;
+					jumpTimer = 0;
+				}
 			}
-			// However, just raycasting straight down from the center can fail when on steep slopes
-			// So if the above raycast didn't catch anything, raycast down from the stored ControllerColliderHit point instead
 			else {
-				Physics.Raycast(contactPoint + Vector3.up, -Vector3.up, out hit);
-				if (Vector3.Angle(hit.normal, Vector3.up) > slideLimit)
-					sliding = true;
+				// If we stepped over a cliff or something, set the height at which we started falling
+				if (!falling) {
+					falling = true;
+					fallStartLevel = myTransform.position.y;
+				}
+				
+				// If air control is allowed, check movement but don't touch the y component
+				if (airControl && playerControl) {
+					moveDirection.x = inputX * speed * airModifyFactor * inputModifyFactor;
+					moveDirection.z = inputY * speed * airModifyFactor * inputModifyFactor;
+					moveDirection = myTransform.TransformDirection(moveDirection);
+				}
 			}
 
-			
-			// If we were falling, and we fell a vertical distance greater than the threshold, run a falling damage routine
-			if (falling) {
-				falling = false;
-				if (myTransform.position.y < fallStartLevel - fallingDamageThreshold)
-					FallingDamageAlert (fallStartLevel - myTransform.position.y);
-			}
-			
-			// If running isn't on a toggle, then use the appropriate speed depending on whether the run button is down
-			if (!toggleRun)
-				speed = Input.GetButton("Run")? runSpeed : walkSpeed;
-			
-			// If sliding (and it's allowed), or if we're on an object tagged "Slide", get a vector pointing down the slope we're on
-			if ( (sliding && slideWhenOverSlopeLimit) || (slideOnTaggedObjects && hit.collider.tag == "Slide") ) {
-				Vector3 hitNormal = hit.normal;
-				moveDirection = new Vector3(hitNormal.x, -hitNormal.y, hitNormal.z);
-				Vector3.OrthoNormalize (ref hitNormal, ref moveDirection);
-				moveDirection *= slideSpeed;
-				playerControl = false;
-			}
-			// Otherwise recalculate moveDirection directly from axes, adding a bit of -y to avoid bumping down inclines
-			else {
-				moveDirection = new Vector3(inputX * inputModifyFactor, -antiBumpFactor, inputY * inputModifyFactor);
-				moveDirection = myTransform.TransformDirection(moveDirection) * speed;
-				playerControl = true;
-			}
-			
-			// Jump! But only if the jump button has been released and player has been grounded for a given number of frames
-			if (!Input.GetButton("Jump"))
-				jumpTimer++;
-			else if (jumpTimer >= antiBunnyHopFactor) {
-				moveDirection.y = jumpSpeed;
-				jumpTimer = 0;
-			}
-		}
-		else {
-			// If we stepped over a cliff or something, set the height at which we started falling
-			if (!falling) {
-				falling = true;
-				fallStartLevel = myTransform.position.y;
-			}
-			
-			// If air control is allowed, check movement but don't touch the y component
-			if (airControl && playerControl) {
-				moveDirection.x = inputX * speed * airModifyFactor * inputModifyFactor;
-				moveDirection.z = inputY * speed * airModifyFactor * inputModifyFactor;
-				moveDirection = myTransform.TransformDirection(moveDirection);
-			}
-		}
 
+			// Apply gravity
+			if(isOnTheWall){
+				moveDirection.y = 0;
+				if (Input.GetButtonDown("Jump"))
+				{
+					isOnTheWall=false;
+					moveDirection.y = jumpSpeed;
+				}
 
-		// Apply gravity
-		if(isOnTheWall){
-			moveDirection.y = 0;
-			if (Input.GetButtonDown("Jump"))
+			}
+			else{
+				moveDirection.y -= gravity * Time.deltaTime;
+			}
+			
+			// Move the controller, and set grounded true or false depending on whether we're standing on something
+			grounded = (controller.Move(moveDirection * Time.deltaTime) & CollisionFlags.Below) != 0;
+			if(Mathf.Abs(moveDirection.x)>=Mathf.Abs(moveDirection.z))
 			{
-				isOnTheWall=false;
-				moveDirection.y = jumpSpeed;
+				actualSpeed=Mathf.Abs(moveDirection.x);
+			}
+			else 
+			{
+				actualSpeed=Mathf.Abs(moveDirection.z);
 			}
 
-		}
-		else{
-			moveDirection.y -= gravity * Time.deltaTime;
-		}
-		
-		// Move the controller, and set grounded true or false depending on whether we're standing on something
-		grounded = (controller.Move(moveDirection * Time.deltaTime) & CollisionFlags.Below) != 0;
-		if(Mathf.Abs(moveDirection.x)>=Mathf.Abs(moveDirection.z))
-		{
-			actualSpeed=Mathf.Abs(moveDirection.x);
-		}
-		else 
-		{
-			actualSpeed=Mathf.Abs(moveDirection.z);
-		}
-
-		if(actualSpeed == 0){
-			barSpeed = 0.80f;
-		}
-		else if(actualSpeed<speedRegenHealth){
-			barSpeed = 0.80f-actualSpeed/speedRegenHealth*0.80f;
-		}
-		else{
-			barSpeed = -actualSpeed/speed*0.35f;
-		}
-
-		//ACTIVATE HYPERMODE OMAGAD
-		if(healthBar<4)
-		{
-			if(!hyperModeTimeBool)
-			{
-				hyperModeTime=Time.time;
-				hyperModeTimeBool=true;
+			if(actualSpeed == 0){
+				barSpeed = 0.80f;
 			}
-			else if(Time.time-hyperModeTime>=3)
+			else if(actualSpeed<speedRegenHealth){
+				barSpeed = 0.80f-actualSpeed/speedRegenHealth*0.80f;
+			}
+			else{
+				barSpeed = -actualSpeed/speed*0.35f;
+			}
+
+			//ACTIVATE HYPERMODE OMAGAD
+			if(healthBar<4)
 			{
-				hyperMode=true;
+				if(!hyperModeTimeBool)
+				{
+					hyperModeTime=Time.time;
+					hyperModeTimeBool=true;
+				}
+				else if(Time.time-hyperModeTime>=3)
+				{
+					hyperMode=true;
+					hyperModeTime=0;
+				}
+			}
+			if(watered)
+			{
+				gameOver=true;
+			}
+
+			if(hyperMode)
+			{
+				if(Camera.main.fieldOfView<maxFov)
+					Camera.main.fieldOfView+=60*Time.deltaTime;
+				speed = 30.0f;
+				walkSpeed = 30.0f;
+			}
+			else
+			{
+				if(Camera.main.fieldOfView>fov)
+					Camera.main.fieldOfView-=60*Time.deltaTime;
+				speed = 20.0f;
+				walkSpeed = 20.0f;
+			}
+
+			if(healthBar>10)
+			{
+				hyperMode=false;
+				hyperModeTimeBool=false;
 				hyperModeTime=0;
 			}
+			//Bar limits
+			if(healthBar>maxHealth){
+				gameOver = true;
+			}
+			if(healthBar<minHealth){
+				healthBar = minHealth;
+			}
+			
+			if(gameOver){
+				Application.LoadLevel(Application.loadedLevel);
+			}
+			healthBar+=barSpeed;
 		}
-		if(watered)
-		{
-			gameOver=true;
-		}
-
-		if(hyperMode)
-		{
-			if(Camera.main.fieldOfView<maxFov)
-				Camera.main.fieldOfView+=60*Time.deltaTime;
-			speed = 30.0f;
-			walkSpeed = 30.0f;
-		}
-		else
-		{
-			if(Camera.main.fieldOfView>fov)
-				Camera.main.fieldOfView-=60*Time.deltaTime;
-			speed = 20.0f;
-			walkSpeed = 20.0f;
-		}
-
-		if(healthBar>10)
-		{
-			hyperMode=false;
-			hyperModeTimeBool=false;
-			hyperModeTime=0;
-		}
-		print (actualSpeed);
-		//Bar limits
-		if(healthBar>maxHealth){
-			gameOver = true;
-		}
-		if(healthBar<minHealth){
-			healthBar = minHealth;
-		}
-		
-		if(gameOver){
-			Application.LoadLevel(Application.loadedLevel);
-		}
-		healthBar+=barSpeed;
 
 	}
 
@@ -266,12 +268,11 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 			gameOver=true;
 		}
 
-		if(other.tag == "Finish")
+		if(other.tag == "End")
 		{
 			finished = true;
 		}
 	}
-
 
 	void OnTriggerExit(Collider other) {
 		if(other.tag == "WallJump" || other.tag == "Agripper")
@@ -280,22 +281,9 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 		}
 	}
 
-	
-	void OnGUI()
-	{
-		if(finished)
-		{
-			Texture2D t = new Texture2D(1,1);
-			Color currentBlendColor = new Color( 1, 1, 1, 0 ); 
-			Color fromColor = new Color( 1, 1, 1, 0 ); 
-			Color toColor = new Color( 1, 1, 1, 1 );
-			float endSpeed = 10;
-			t.SetPixel( 0, 0, Color.white );
-			currentBlendColor = Color.Lerp( currentBlendColor , toColor, Time.deltaTime * speed );
-			GUI.color = currentBlendColor;
-			GUI.DrawTexture(new Rect(0,0,Screen.width,Screen.height), t, ScaleMode.ScaleToFit); 
-		}
-	}
+
+
+
 
 
 	void Update () {
@@ -314,7 +302,6 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 	
 	// If falling damage occured, this is the place to do something about it. You can make the player
 	// have hitpoints and remove some of them based on the distance fallen, add sound effects, etc.
-	void FallingDamageAlert (float fallDistance) {
-		print ("Ouch! Fell " + fallDistance + " units!");   
+	void FallingDamageAlert (float fallDistance) { 
 	}
 }
