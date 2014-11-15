@@ -60,6 +60,15 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 	public bool finished = false;
 
 
+	/*
+	 * 0 = Ne bouge pas
+	 * 1 = Course normale
+	 * 2 = HyperMode sprint #savavite
+	 * 3 = Saute
+	 * 4 = WallJump
+	 * */
+	public int state = 0;
+
 	private float actualSpeed;
 	private bool gameOver;
 	private Vector3 moveDirection = Vector3.zero;
@@ -143,9 +152,12 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 				}
 				
 				// Jump! But only if the jump button has been released and player has been grounded for a given number of frames
-				if (!Input.GetButton("Jump"))
+				if (!Input.GetButton("Jump")){
+
 					jumpTimer++;
+				}
 				else if (jumpTimer >= antiBunnyHopFactor) {
+					state=3;
 					moveDirection.y = jumpSpeed;
 					jumpTimer = 0;
 				}
@@ -174,8 +186,14 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 					isOnTheWall=false;
 					moveDirection.y = jumpSpeed;
 				}
-
 			}
+
+			if(state==4 && Input.GetKeyDown(KeyCode.Space))
+			{
+				state=3;
+			}
+
+
 			else{
 				moveDirection.y -= gravity * Time.deltaTime;
 			}
@@ -192,17 +210,18 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 			}
 
 			if(actualSpeed == 0){
+				state = 0;
 				barSpeed = 0.80f;
 			}
-			else if(actualSpeed<speedRegenHealth){
-				barSpeed = 0.80f-actualSpeed/speedRegenHealth*0.80f;
+			else if(actualSpeed>speedRegenHealth && !hyperMode){
+				barSpeed = 0;
 			}
-			else{
+			if(hyperMode){
 				barSpeed = -actualSpeed/speed*0.35f;
 			}
 
 			//ACTIVATE HYPERMODE OMAGAD
-			if(healthBar<4)
+			if(actualSpeed > 10)
 			{
 				if(!hyperModeTimeBool)
 				{
@@ -235,7 +254,7 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 				walkSpeed = 20.0f;
 			}
 
-			if(healthBar>10)
+			if(actualSpeed == 0)
 			{
 				hyperMode=false;
 				hyperModeTimeBool=false;
@@ -253,6 +272,18 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 				Application.LoadLevel(Application.loadedLevel);
 			}
 			healthBar+=barSpeed;
+
+
+			
+			if((moveDirection.x>0 || moveDirection.z>0) && grounded){
+				if(hyperMode){
+					state=2;
+				}
+				else{
+					state=1;
+				}
+			}
+			print (state);
 		}
 
 	}
@@ -260,6 +291,7 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 	void OnTriggerEnter(Collider other) {
 		if(other.tag == "WallJump" || other.tag == "Agripper")
 		{
+			state=4;
 			isOnTheWall=true;
 		}
 
