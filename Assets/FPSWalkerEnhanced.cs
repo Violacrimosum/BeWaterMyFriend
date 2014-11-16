@@ -190,13 +190,11 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 					isOnTheWall=false;
 					moveDirection.y = jumpSpeed;
 				}
-
 			}
 
 			if(state==4 && Input.GetKeyDown(KeyCode.Space))
 			{
 				state=3;
-
 			}
 
 
@@ -280,6 +278,19 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 				Application.LoadLevel(Application.loadedLevel);
 			}
 			healthBar+=barSpeed;
+
+
+			
+			if((moveDirection.x>0 || moveDirection.z>0) && grounded){
+				if(hyperMode){
+					state=2;
+				}
+				else{
+					state=1;
+				}
+			}
+			print (state);
+		}
 
 
 			
