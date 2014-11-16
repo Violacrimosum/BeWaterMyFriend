@@ -11,7 +11,6 @@ public class FadeText : MonoBehaviour {
 	void fadeToWhite()
 	{
 		guiText.color = Color.Lerp (guiText.color, Color.black,0.0045f);
-		print ("OMAGAD");
 	}
 	
 
@@ -37,8 +36,7 @@ public class FadeText : MonoBehaviour {
 	{
 
 		isFinished = GameObject.Find("fadeScreen").GetComponent<FadeScreen>().isFadeText;
-		
-		print (isFinished);
+
 		if(isFinished)
 		{
 			endScene ();

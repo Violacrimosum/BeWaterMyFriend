@@ -18,7 +18,7 @@ public class HUDmenu : MonoBehaviour {
     GameObject Fx;
     void Play(GameObject _Btn)
     {
-        Application.LoadLevel("gameScene");
+        Application.LoadLevel(1);
     }
     void ShowCredit(GameObject _Btn)
     {

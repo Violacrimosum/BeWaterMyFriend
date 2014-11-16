@@ -3,7 +3,9 @@ using System.Collections;
 
 [RequireComponent (typeof (CharacterController))]
 public class FPSWalkerEnhanced: MonoBehaviour {
-	
+
+	//public GameObject fog;
+
 	public float walkSpeed = 20.0f;
 	
 	public float runSpeed = 11.0f;
@@ -15,7 +17,7 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 	// There must be a button set up in the Input Manager called "Run"
 	public bool toggleRun = false;
 	
-	public float jumpSpeed = 8.0f;
+	public float jumpSpeed = 11.0f;
 	public float gravity = 20.0f;
 	
 	// Units that player can fall before a falling damage function is run. To disable, type "infinity" in the inspector
@@ -37,11 +39,11 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 	
 	// Player must be grounded for at least this many physics frames before being able to jump again; set to 0 to allow bunny hopping
 	public int antiBunnyHopFactor = 1;
-
+	
 	//Modify the air control 
 	public float airModifyFactor = 1;
-
-
+	
+	
 	public float healthBar = 0;
 	public float maxHealth = 100;
 	public float minHealth = 0;
@@ -49,9 +51,9 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 	public float speedRegenHealth = 15;
 	public float fov = 60;
 	public float maxFov = 75;
-
+	
 	public bool watered = false;
-
+	
 	private bool isOnTheWall;
 	private bool jumped= false;
 	private bool hyperMode=false;
@@ -59,6 +61,15 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 	private float hyperModeTime=0;
 	public bool finished = false;
 
+
+	/*
+	 * 0 = Ne bouge pas
+	 * 1 = Course normale
+	 * 2 = HyperMode sprint #savavite
+	 * 3 = Saute
+	 * 4 = WallJump
+	 * */
+	public int state = 0;
 
 	private float actualSpeed;
 	private bool gameOver;
@@ -75,7 +86,7 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 	private Vector3 contactPoint;
 	private bool playerControl = false;
 	private int jumpTimer;
-
+	
 	
 	void Start() {
 		controller = GetComponent<CharacterController>();
@@ -90,16 +101,18 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 	}
 	
 	void FixedUpdate() {
+		GameObject.Find ("Camera").GetComponent <GlobalFog>().startDistance = 515-(15+((healthBar*485)/maxHealth));
+		GameObject.Find ("Camera").GetComponent <GlobalFog>().globalDensity = (healthBar*0.3f)/maxHealth;
 		if(!finished)
 		{
-
+			
 			float inputX = Input.GetAxis("Horizontal");
 			float inputY = Input.GetAxis("Vertical");
 			// If both horizontal and vertical are used simultaneously, limit speed (if allowed), so the total doesn't exceed normal move speed
 			float inputModifyFactor = (inputX != 0.0f && inputY != 0.0f && limitDiagonalSpeed)? .7071f : 1.0f;
-
+			
 			if (grounded) {
-
+				
 				bool sliding = false;
 				// See if surface immediately below should be slid down. We use this normally rather than a ControllerColliderHit point,
 				// because that interferes with step climbing amongst other annoyances
@@ -114,7 +127,7 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 					if (Vector3.Angle(hit.normal, Vector3.up) > slideLimit)
 						sliding = true;
 				}
-
+				
 				
 				// If we were falling, and we fell a vertical distance greater than the threshold, run a falling damage routine
 				if (falling) {
@@ -143,9 +156,12 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 				}
 				
 				// Jump! But only if the jump button has been released and player has been grounded for a given number of frames
-				if (!Input.GetButton("Jump"))
+				if (!Input.GetButton("Jump")){
+
 					jumpTimer++;
+				}
 				else if (jumpTimer >= antiBunnyHopFactor) {
+					state=3;
 					moveDirection.y = jumpSpeed;
 					jumpTimer = 0;
 				}
@@ -164,8 +180,8 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 					moveDirection = myTransform.TransformDirection(moveDirection);
 				}
 			}
-
-
+			
+			
 			// Apply gravity
 			if(isOnTheWall){
 				moveDirection.y = 0;
@@ -176,6 +192,14 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 				}
 
 			}
+
+			if(state==4 && Input.GetKeyDown(KeyCode.Space))
+			{
+				state=3;
+
+			}
+
+
 			else{
 				moveDirection.y -= gravity * Time.deltaTime;
 			}
@@ -190,19 +214,20 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 			{
 				actualSpeed=Mathf.Abs(moveDirection.z);
 			}
-
+			
 			if(actualSpeed == 0){
+				state = 0;
 				barSpeed = 0.80f;
 			}
-			else if(actualSpeed<speedRegenHealth){
-				barSpeed = 0.80f-actualSpeed/speedRegenHealth*0.80f;
+			else if(actualSpeed>speedRegenHealth && !hyperMode){
+				barSpeed = 0;
 			}
-			else{
+			if(hyperMode){
 				barSpeed = -actualSpeed/speed*0.35f;
 			}
-
+			
 			//ACTIVATE HYPERMODE OMAGAD
-			if(healthBar<4)
+			if(actualSpeed > 10)
 			{
 				if(!hyperModeTimeBool)
 				{
@@ -219,7 +244,7 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 			{
 				gameOver=true;
 			}
-
+			
 			if(hyperMode)
 			{
 				if(Camera.main.fieldOfView<maxFov)
@@ -235,7 +260,8 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 				walkSpeed = 20.0f;
 			}
 
-			if(healthBar>10)
+
+			if(actualSpeed == 0)
 			{
 				hyperMode=false;
 				hyperModeTimeBool=false;
@@ -243,7 +269,8 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 			}
 			//Bar limits
 			if(healthBar>maxHealth){
-				gameOver = true;
+				healthBar = maxHealth;
+				//gameOver = true;
 			}
 			if(healthBar<minHealth){
 				healthBar = minHealth;
@@ -253,46 +280,59 @@ public class FPSWalkerEnhanced: MonoBehaviour {
 				Application.LoadLevel(Application.loadedLevel);
 			}
 			healthBar+=barSpeed;
+
+
+			
+			if((moveDirection.x>0 || moveDirection.z>0) && grounded){
+				if(hyperMode){
+					state=2;
+				}
+				else{
+					state=1;
+				}
+			}
+			print (state);
 		}
-
+		
 	}
-
+	
 	void OnTriggerEnter(Collider other) {
 		if(other.tag == "WallJump" || other.tag == "Agripper")
 		{
+			state=4;
 			isOnTheWall=true;
 		}
-
+		
 		if(other.tag == "Water")
 		{
 			gameOver=true;
 		}
-
+		
 		if(other.tag == "End")
 		{
 			finished = true;
 		}
 	}
-
+	
 	void OnTriggerExit(Collider other) {
 		if(other.tag == "WallJump" || other.tag == "Agripper")
 		{
 			isOnTheWall=false;
 		}
 	}
-
-
-
-
-
-
+	
+	
+	
+	
+	
+	
 	void Update () {
 		// If the run button is set to toggle, then switch between walk/run speed. (We use Update for this...
 		// FixedUpdate is a poor place to use GetButtonDown, since it doesn't necessarily run every frame and can miss the event)
 		if (toggleRun && grounded && Input.GetButtonDown("Run"))
 			speed = (speed == walkSpeed? runSpeed : walkSpeed);
-
-
+		
+		
 	}
 	
 	// Store point that we're in contact with for use in FixedUpdate if needed
